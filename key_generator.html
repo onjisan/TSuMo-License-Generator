@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TSuMo License Generator</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #1e1e1e;
+        color: #fff;
+        text-align: center;
+        padding: 40px;
+    }
+    input, button {
+        padding: 10px;
+        font-size: 16px;
+        margin: 10px;
+    }
+    .output {
+        margin-top: 20px;
+        text-align: left;
+        display: inline-block;
+        background: #2a2a2a;
+        padding: 20px;
+        border-radius: 8px;
+    }
+</style>
+</head>
+<body>
+
+<h1>TSuMo License Generator</h1>
+
+<input type="text" id="licenseInput" placeholder="Enter 8-digit hex license ID">
+<br>
+<button onclick="generateKeys()">Generate</button>
+
+<div id="output" class="output"></div>
+
+<script>
+class TSUMO_Game {
+    constructor(title, game_id) {
+        this.game_title = title;
+        this.game_id = game_id;
+    }
+}
+
+const TSUMO_Games = [
+    new TSUMO_Game('Air Raid', 0x6B28D609),
+    new TSUMO_Game('AirStrike', 0x51694A6E),
+    new TSUMO_Game('BeachHead 2000 SE', 0xD53BB2C7),
+    new TSUMO_Game('Crimson Skies', 0xBA49994D),
+    new TSUMO_Game('ExZeus', 0xBB053D9F),
+    new TSUMO_Game('Mechwarrior 4', 0x85BFA92E),
+    new TSUMO_Game('Starfighter', 0xE18F8DE1),
+    new TSUMO_Game('Motion Adventures', 0xAA83E155),
+    new TSUMO_Game('ReVolt', 0x6816AA99)
+];
+
+function generate_tsumo_game_key(license_id, game_id) {
+    let original_license = parseInt(license_id, 16);
+
+    let shifted_value = (original_license >>> 28) & 0x0F;
+    let result_value = (original_license >>> (32 - shifted_value)) & 0xFFFF;
+
+    result_value |= (original_license << shifted_value);
+    result_value ^= game_id;
+
+    return (result_value >>> 0).toString(16).toUpperCase().padStart(8, '0');
+}
+
+function generateKeys() {
+    let license_id = document.getElementById("licenseInput").value.trim();
+
+    if (!/^[0-9a-fA-F]{8}$/.test(license_id)) {
+        alert("Invalid license ID. Must be 8-digit hex.");
+        return;
+    }
+
+    let output = `<strong>Machine License ID:</strong> ${license_id}<br><hr>`;
+
+    TSUMO_Games.forEach(game => {
+        let key = generate_tsumo_game_key(license_id, game.game_id);
+        output += `${game.game_title}: ${key}<br>`;
+    });
+
+    document.getElementById("output").innerHTML = output;
+}
+</script>
+
+</body>
+</html>
